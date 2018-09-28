@@ -1,0 +1,18 @@
+	madelon_test
+		1800 x 500
+
+
+	madelon_train
+		2000 x 500
+
+	madelon_train_label
+		2000 x 1
+
+	madelon_valid
+		600 x 500
+
+	madelon_valid_label
+		1 x 500
+
+
+
