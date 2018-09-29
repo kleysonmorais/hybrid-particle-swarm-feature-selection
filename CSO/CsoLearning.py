@@ -5,16 +5,15 @@
 #
 # ------------------------------------------------------------------------------+
 
-# from Controller import *
-from PSO.PsoController import EnxameController
+from CSO.CsoController import EnxameController
 
-class PsoLearning:
+class CsoLearning:
 
     ec = None
 
     def __init__(self):
         self.ec = EnxameController()
 
-    def aprendizagem(self, enxame):
-        # print("Aprendizagem PSO")
-        self.ec.atualizaEnxame(enxame)
+    def aprendizagem(self, sub_pso, sub_cso, particula_media):
+        # print("Aprendizagem CSO")
+        self.ec.atualizaEnxame(sub_pso, sub_cso, particula_media)

@@ -48,8 +48,8 @@ class ParticulaController:
         '''
         Função para calcular o fitness da partícula, onde 1 significa atributo utilizado e 0 não utilizado
         '''        
-        merito = self.ac.RandomForest(particula._posicao)
-        # merito = self.ac.NaiveBayes(particula._posicao)
+        # merito = self.ac.RandomForest(particula._posicao)
+        merito = self.ac.NaiveBayes(particula._posicao)
         if particula._fitness is None or merito > particula._fitness:
             particula._melhorPosicaoLocal = np.copy(particula._posicao)
             particula._fitness = merito
@@ -62,6 +62,24 @@ class ParticulaController:
             pWin = p2
             pLoser = p1
         return pWin, pLoser
+
+    def particulaMedia(self, enxame):
+        tamanho = len(enxame._particulas)
+        particula_media = []
+        for index in range(len(enxame._particulas[0]._posicao)):
+            somatorio = 0
+            for particula in enxame._particulas:
+                somatorio += particula._posicao[index]
+            media_enxame = float(somatorio)/float(tamanho)
+            if media_enxame > 0.5:
+                particula_media.append(1)
+            elif media_enxame < 0.5:
+                particula_media.append(0)
+            else:
+                # Igual a 0.5
+                # Recebe um número aleatório (0 ou 1)
+                particula_media.append(randint(0, 1))
+        return particula_media
 
 
 class EnxameController:
@@ -83,6 +101,17 @@ class EnxameController:
         print("Enxame Criado Com Sucesso")
 
 
+    def atualizaMelhorPosicaoEnxame(self, enxame):
+        # print("Atualizando Melhor Posição do Enxame")
+
+        for particula in enxame._particulas:
+            if (enxame._melhorFitness is None) or (particula._fitness > enxame._melhorFitness):
+                enxame._melhorPosicaoGlobal = np.copy(particula._melhorPosicaoLocal)
+                enxame._melhorFitness = particula._fitness
+
+        for particula in enxame._particulas:
+            particula._melhorPosicaoGlobal = np.copy(enxame._melhorPosicaoGlobal)
+            
     def dividirEnxame(self, enxame):
         
         sub_pso = EnxameModel()
@@ -106,5 +135,5 @@ class EnxameController:
             #     resto = enxame._particulas.pop()
             #     sub_cso._particulas.append(resto)
 
-        print("Enxame Dividido: ", len(enxame._particulas))
+        # print("Enxame Dividido: ", len(enxame._particulas))
         return sub_pso, sub_cso

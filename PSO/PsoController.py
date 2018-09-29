@@ -64,18 +64,6 @@ class EnxameController:
     def __init__(self):
         self.pc = ParticulaController()
 
-    def atualizaMelhorPosicaoEnxame(self, enxame):
-        print("Atualizando Melhor Posição do Enxame")
-
-        for particula in enxame._particulas:
-            if (enxame._melhorFitness is None) or (particula._fitness > enxame._melhorFitness):
-                enxame._melhorPosicaoGlobal = np.copy(particula._melhorPosicaoLocal)
-                enxame._melhorFitness = particula._fitness
-
-        for particula in enxame._particulas:
-            particula._melhorPosicaoGlobal = np.copy(enxame._melhorPosicaoGlobal)
-
     def atualizaEnxame(self, enxame):
         for particula in enxame._particulas:
-            print()
             self.pc.atualizaPosicao(particula)
