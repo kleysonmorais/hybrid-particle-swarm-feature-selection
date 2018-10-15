@@ -18,9 +18,11 @@ class ParticulaController:
 
     dadosModel = None
     ac = None
+    buffer = None
 
-    def __init__(self, avaliador):
+    def __init__(self, avaliador, BufferController):
         self.ac = avaliador
+        self.buffer = BufferController
 
     def criarParticular(self, particula, dados):
         '''
@@ -41,8 +43,8 @@ class ParticulaController:
 
         #Salvar o fitness da respectiva posição
         self.atualizaFitness(particula)
-        print("Partícula Criada:")
-        print(particula._posicao,' | ', particula._fitness)
+        # print("Partícula Criada:")
+        # print(particula._posicao,' | ', particula._fitness)
 
     def atualizaFitness(self, particula):
         '''
@@ -50,6 +52,11 @@ class ParticulaController:
         '''        
         # merito = self.ac.RandomForest(particula._posicao)
         merito = self.ac.NaiveBayes(particula._posicao)
+        # merito = self.ac.KNeighborsClassifier(particula._posicao)
+
+        if self.buffer.search_buffer(particula._posicao):
+            self.buffer.save_buffer(particula._posicao)
+
         if particula._fitness is None or merito > particula._fitness:
             particula._melhorPosicaoLocal = np.copy(particula._posicao)
             particula._fitness = merito
@@ -86,10 +93,12 @@ class EnxameController:
 
     pc              = None
     dadosModel      = None
+    buffer = None
   
-    def __init__(self, DadosModel, avaliador):
-        self.pc = ParticulaController(avaliador)
+    def __init__(self, DadosModel, avaliador, BufferController):
+        self.pc = ParticulaController(avaliador, BufferController)
         self.dadosModel = DadosModel
+        self.buffer = BufferController
 
     def criarEnxame(self, enxame, nParticulas):
         print("Criando Enxame de Partículas")
@@ -99,7 +108,6 @@ class EnxameController:
             self.pc.criarParticular(novaParticula, self.dadosModel)
             enxame._particulas.append(novaParticula)
         print("Enxame Criado Com Sucesso")
-
 
     def atualizaMelhorPosicaoEnxame(self, enxame):
         # print("Atualizando Melhor Posição do Enxame")
