@@ -85,7 +85,7 @@ class AvaliadorController():
         
         X_subset = self.selectionFeatures(features, self.dados)
         f1score, acuracia = self.allMetrics(classificador, X_subset, self.atributoClassificador)
-        print('Erro: F1 Score após a Selection Feature Aplicada (', X_subset.shape[1] ,' atributos) é: ', f1score,'%')
+        print('Erro: F1 Score após a Selection Feature Aplicada (', X_subset.shape[1] ,' atributos) é: ', 1-f1score,'%')
         print('Erro: Acurácia após a Selection Feature Aplicada (', X_subset.shape[1] ,' atributos) é: ', 1-acuracia,'%')
         print('---------------------------------------------------------------------------------------')
 

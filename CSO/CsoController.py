@@ -31,38 +31,22 @@ class ParticulaController:
             pWin = p2
             pLoser = p1
         
-        c = 2.5
+        c = 1.49618
 
-        #Número aleatório entre 0 e 1
         r1 = np.random.rand() 
         r2 = np.random.rand() 
         r3 = np.random.rand() 
-        valorMaximo = 6
 
         for i, velocidade in enumerate(pLoser._velocidade):
-            #Calculando velocidade
             velocidade = (r1 * velocidade) + (r2 * (pWin._posicao[i] - pLoser._posicao[i])) + (c * r3 * (media_enxame[i] - pLoser._posicao[i]))
-            #Verificar Limite
-            if abs(velocidade) > valorMaximo and abs(velocidade) is velocidade:
-                velocidade = valorMaximo
-            elif abs(velocidade) > valorMaximo:
-                velocidade = -valorMaximo
-            velocidade = self.sigmoid(velocidade)
-        
-            #Condicional de definição 0 ou 1
-            if velocidade > 0.5:
-                pLoser._velocidade[i] = 1
-            elif velocidade < 0.5:
-                pLoser._velocidade[i] = 0
-            else:
-                # Igual a 0.5, recebe bit aleatório (0 ou 1)
-                pLoser._velocidade[i] = randint(0, 1)
+            posicao = pLoser._posicao[i] + velocidade
             
-            aux = np.random.rand()
-            if aux < velocidade:
+            if posicao > 0.5:
                 pLoser._posicao[i] = 1
             else:            
                 pLoser._posicao[i] = 0
+            
+            pLoser._velocidade[i] = velocidade
         
     def sigmoid(self, x):
         return 1.0/(1.0 + np.exp(-(x)))

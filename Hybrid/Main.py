@@ -27,13 +27,14 @@ def inicializa(nome, qtdParticulas, buffer):
 
     # Ajustando Parâmetros
     avaliarController = AvaliadorController(X, y)
-    dadosModel = DadosModel(X, y)
+    # dadosModel = DadosModel(X, y)
     pso = PsoLearning()
     cso = CsoLearning()
 
     # Inicializando Enxame
+    nLinhas, nAtributos = X.shape
     enxame = EnxameModel()
-    enxameController = EnxameController(dadosModel, avaliarController, buffer)
+    enxameController = EnxameController(nAtributos, avaliarController, buffer)
     enxameController.criarEnxame(enxame, qtdParticulas)
 
     return enxame, enxameController, avaliarController, pso, cso
@@ -106,7 +107,7 @@ if __name__ == "__main__":
     
     # nomes = ["cancer", "ionosphere", "isolet5", "madelon", "musk", "sonar", "wine"]
     # nomes = ["isolet5", "madelon", "musk"]
-    nomes = ["wine", "sonar"]
+    nomes = ["cancer", "ionosphere", "sonar", "wine"]
 
     qtdParticulas = int(sys.argv[1])
     geracoes = int(sys.argv[2])

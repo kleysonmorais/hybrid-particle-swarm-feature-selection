@@ -16,7 +16,6 @@ import copy
 
 class ParticulaController:
 
-    dadosModel = None
     ac = None
     buffer = None
 
@@ -24,7 +23,7 @@ class ParticulaController:
         self.ac = avaliador
         self.buffer = BufferController
 
-    def criarParticular(self, particula, dados):
+    def criarParticular(self, particula, nAtributos):
         '''
         Esta função cria uma partícula para o enxame, personalizando a mesma para que tenha as características 
         do banco de dados informado.
@@ -32,8 +31,6 @@ class ParticulaController:
         - São gerados aleatoriamente: Posição e Velociade
         - Cada partícula possui também a melhor posição pela qual ela já passou e seu respectivo fitness
         '''
-        self.dadosModel = dados
-        nLinhas, nAtributos = self.dadosModel._dados.shape
         #Criar array com posição (binário)
         particula._posicao = np.random.randint(2, size = nAtributos)
         #Criar array com velocidade (binário)
@@ -50,13 +47,18 @@ class ParticulaController:
         '''
         Função para calcular o fitness da partícula, onde 1 significa atributo utilizado e 0 não utilizado
         '''        
-        # merito = self.ac.RandomForest(particula._posicao)
-        merito = self.ac.NaiveBayes(particula._posicao)
-        # merito = self.ac.KNeighborsClassifier(particula._posicao)
 
         if self.buffer.search_buffer(particula._posicao):
             self.buffer.save_buffer(particula._posicao)
 
+        merito = self.buffer.search_buffer_global(particula._posicao)
+        if merito is None:
+            # merito = self.ac.RandomForest(particula._posicao)
+            merito = self.ac.NaiveBayes(particula._posicao)
+            # merito = self.ac.KNeighborsClassifier(particula._posicao)
+            self.buffer.save_buffer_global(particula._posicao, merito)
+    
+        # print(self.buffer.search_buffer_global(particula._posicao))
         if particula._fitness is None or merito > particula._fitness:
             particula._melhorPosicaoLocal = np.copy(particula._posicao)
             particula._fitness = merito
@@ -92,12 +94,12 @@ class ParticulaController:
 class EnxameController:
 
     pc              = None
-    dadosModel      = None
+    nAtributos      = None
     buffer = None
   
-    def __init__(self, DadosModel, avaliador, BufferController):
+    def __init__(self, nAtributos, avaliador, BufferController):
         self.pc = ParticulaController(avaliador, BufferController)
-        self.dadosModel = DadosModel
+        self.nAtributos = nAtributos
         self.buffer = BufferController
 
     def criarEnxame(self, enxame, nParticulas):
@@ -105,7 +107,7 @@ class EnxameController:
         for i in range(nParticulas):
             #Criando instância de uma nova partícula e adicionando ao enxame
             novaParticula = ParticulaModel()
-            self.pc.criarParticular(novaParticula, self.dadosModel)
+            self.pc.criarParticular(novaParticula, self.nAtributos)
             enxame._particulas.append(novaParticula)
         print("Enxame Criado Com Sucesso")
 
