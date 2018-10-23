@@ -1,7 +1,7 @@
 import csv
 import pandas as pd
 
-nomeBase = 'wine'
+nomeBase = 'ionosphere'
 qtdFeatures = [0 for _ in range(201)]
 qtdParticulas = [0 for _ in range(201)]
 fitness = [0 for _ in range(201)]
