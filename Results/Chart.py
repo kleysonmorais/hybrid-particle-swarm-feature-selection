@@ -39,7 +39,7 @@ def selection_generation(nomeBase, data):
     plt.savefig('selection_generation.png', format='png')
 
 def main():
-    nomeBase = 'ionosphere'
+    nomeBase = 'madelon'
 
     URL_csv = '../buffer/'+nomeBase+'/'+nomeBase+'MEDIA_TOTAL.csv'
     data = pd.read_csv(URL_csv)

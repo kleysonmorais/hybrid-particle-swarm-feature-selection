@@ -1,31 +1,27 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# from sklearn import svm
-from sklearn import tree
 from sklearn.naive_bayes import GaussianNB
-from sklearn.model_selection import train_test_split
+# from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import f1_score, confusion_matrix, accuracy_score
 from sklearn.model_selection import cross_val_predict
-from sklearn.metrics import roc_curve, roc_auc_score
+# from sklearn.metrics import roc_curve, roc_auc_score
 from matplotlib import pyplot as plt
-from sklearn.preprocessing import label_binarize
-from sklearn.neighbors import KNeighborsClassifier
+# from sklearn.preprocessing import label_binarize
+# from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import precision_score
 
 class AvaliadorController():
 
     dados                   = None
     atributoClassificador   = None
-    # X_train                 = None 
-    # X_test                  = None
-    # y_train                 = None
-    # y_test                  = None
-
-    def __init__(self, dados, atributoClassificador):
+    classificador = None
+    
+    def __init__(self, dados, atributoClassificador, classificador):
         self.dados = dados
         self.atributoClassificador = atributoClassificador
-        # self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.dados, self.atributoClassificador, test_size=0.33, random_state=43)
+        self.classificador = classificador
 
     def selectionFeatures(self, features, base):
         aux = np.asarray(base)
@@ -35,83 +31,69 @@ class AvaliadorController():
             X_subset = aux[:,features==1]
         return X_subset
 
-    # def geracao(self, features):
-    #     X_subset = self.selectionFeatures(features)
-    #     print("Quantidade de Features: ", X_subset.shape[1])
-    #     f1score, acuracia = self.allMetrics(RandomForestClassifier(random_state=43), X_subset)
-    #     f1score, acuracia = self.allMetrics(GaussianNB(), X_subset)
-    #     print('F1 Score: ', f1score,'%')
-    #     print('Acurácia: ', acuracia,'%')
 
-
-    def allClassifiers(self, features, classificador):
-        
-        # print("\nRandom Forest Classifier")        
-        
-        # f1score, acuracia = self.allMetrics(RandomForestClassifier(random_state=43), self.dados)
-        # print('---------------------------------------------------------------------------------------')
-        # print('F1 Score na base original (', self.dados.shape[1] ,' atributos) é: ', f1score*100,'%')
-        # print('Acurácia na base original (', self.dados.shape[1] ,' atributos) é: ', acuracia*100,'%')
-        # print('---------------------------------------------------------------------------------------')
-        
-        # X_subset = self.selectionFeatures(features)
-        # f1score, acuracia = self.allMetrics(RandomForestClassifier(random_state=43), X_subset)
-        # print('F1 Score após a Selection Feature Aplicada (', X_subset.shape[1] ,' atributos) é: ', f1score*100,'%')
-        # print('Acurácia após a Selection Feature Aplicada (', X_subset.shape[1] ,' atributos) é: ', acuracia*100,'%\n')
-        # print('---------------------------------------------------------------------------------------')
-
-        # print("//////////////////////////////////////////////////////////////////////////////////////////")
-        # print("\nNaive Bayes")        
-        
-        # f1score, acuracia = self.allMetrics(GaussianNB(), self.dados)
-        # print('---------------------------------------------------------------------------------------')
-        # print('Erro: F1 Score na base original (', self.dados.shape[1] ,' atributos) é: ', 1-f1score,'%')
-        # print('Erro: Acurácia na base original (', self.dados.shape[1] ,' atributos) é: ', 1-acuracia,'%')
-        # print('---------------------------------------------------------------------------------------')
-        
-        # X_subset = self.selectionFeatures(features)
-        # f1score, acuracia = self.allMetrics(GaussianNB(), X_subset)
-        # print('Erro: F1 Score após a Selection Feature Aplicada (', X_subset.shape[1] ,' atributos) é: ', 1-f1score,'%')
-        # print('Erro: Acurácia após a Selection Feature Aplicada (', X_subset.shape[1] ,' atributos) é: ', 1-acuracia,'%')
-        # print('---------------------------------------------------------------------------------------')
-
-        # print("\nKNN")        
-        
-        f1score, acuracia = self.allMetrics(classificador, self.dados, self.atributoClassificador)
+    def allClassifiers(self, features):
+                
+        f1score, acuracia, precision_score = self.allMetrics(self.dados, self.atributoClassificador)
         print('---------------------------------------------------------------------------------------')
-        print('Erro: F1 Score na base original (', self.dados.shape[1] ,' atributos) é: ', 1-f1score,'%')
-        print('Erro: Acurácia na base original (', self.dados.shape[1] ,' atributos) é: ', 1-acuracia,'%')
+        print('Erro: F1 Score na base original (', self.dados.shape[1] ,' atributos) é: ', f1score,'%')
+        print('Erro: Acurácia na base original (', self.dados.shape[1] ,' atributos) é: ', acuracia,'%')
         print('---------------------------------------------------------------------------------------')
         
         X_subset = self.selectionFeatures(features, self.dados)
-        f1score, acuracia = self.allMetrics(classificador, X_subset, self.atributoClassificador)
-        print('Erro: F1 Score após a Selection Feature Aplicada (', X_subset.shape[1] ,' atributos) é: ', 1-f1score,'%')
-        print('Erro: Acurácia após a Selection Feature Aplicada (', X_subset.shape[1] ,' atributos) é: ', 1-acuracia,'%')
+        f1score, acuracia, precision_score = self.allMetrics(X_subset, self.atributoClassificador)
+        print('Erro: F1 Score após a Selection Feature Aplicada (', X_subset.shape[1] ,' atributos) é: ', f1score,'%')
+        print('Erro: Acurácia após a Selection Feature Aplicada (', X_subset.shape[1] ,' atributos) é: ', acuracia,'%')
         print('---------------------------------------------------------------------------------------')
 
+    def taxaGlobal(self):
+        f1score, acuracia, precision_score = self.allMetrics(self.dados, self.atributoClassificador)
+        print('---------------------------------------------------------------------------------------')
+        print('Erro: F1 Score na base original (', self.dados.shape[1] ,' atributos) é: ', f1score,'%')
+        print('Erro: Acurácia na base original (', self.dados.shape[1] ,' atributos) é: ', acuracia,'%')
+        print('Erro: Precisão na base original (', self.dados.shape[1] ,' atributos) é: ', precision_score,'%')
+        print('---------------------------------------------------------------------------------------')
 
-    def KNeighborsClassifier(self, features):
-        return self.metrics(KNeighborsClassifier(), features)
+    def GlobalClassifier(self, features):
+        return self.metrics(features)
 
-    def RandomForest(self, features):
-        # print("\nRandom Forest Classifier")        
-        return self.metrics(RandomForestClassifier(random_state=43), features)
-
-    def NaiveBayes(self, features):
-        # print("\nNaive Bayes Classifier")
-        return self.metrics(GaussianNB(), features)
-
-    def metrics(self, classificador, features):
+    def metrics(self, features):
         X_subset = self.selectionFeatures(features, self.dados)
-        predicao = cross_val_predict(classificador, X_subset, self.atributoClassificador, cv=10)
-        f1Score = f1_score(self.atributoClassificador, predicao, average='micro')
+        predicao = cross_val_predict(self.classificador, X_subset, self.atributoClassificador, cv=10, n_jobs=-1)
+        CM = confusion_matrix(self.atributoClassificador, predicao)
+
+        TN = CM[0][0]
+        FN = CM[1][0]
+        TP = CM[1][1]
+        FP = CM[0][1]  
+        precisao = (TP+TN)/(TP+FP+FN+TN)
+        recall = TP/(TP + FN)
+        # acuracia = (TP+TN)/(TP+FP+FN+TN)
+        f1Score = 2 * (precisao * recall) / (precisao + recall)
+
+        # f1Score = f1_score(self.atributoClassificador, predicao, average='micro')
         return f1Score
 
-    def allMetrics(self, classificador, X_subset, y_subset):
-        predicao = cross_val_predict(classificador, X_subset, y_subset, cv=10)
-        f1Score = f1_score(y_subset, predicao, average='micro')
-        acuracia = accuracy_score(y_subset, predicao)
-        return f1Score, acuracia
+
+    def allMetrics(self, X_subset, y_subset):
+        predicao = cross_val_predict(self.classificador, X_subset, y_subset, cv=10)
+        CM = confusion_matrix(y_subset, predicao)
+        
+        TN = CM[0][0]
+        FN = CM[1][0]
+        TP = CM[1][1]
+        FP = CM[0][1]  
+        precisao = (TP+TN)/(TP+FP+FN+TN)
+        recall = TP/(TP + FN)
+        acuracia = (TP+TN)/(TP+FP+FN+TN)
+        f1Score = 2 * (precisao * recall) / (precisao + recall)
+
+        print('Precisão: ', precisao)
+        print('F1 Score: ', f1Score)
+        print('Recall: ', recall)
+        print('Acurácia: ', acuracia)
+        
+        return f1Score, acuracia, precisao
 
     def qtdFeatures(self, features):
         X_subset = self.selectionFeatures(features, self.dados)

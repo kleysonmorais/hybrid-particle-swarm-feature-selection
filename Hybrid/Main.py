@@ -11,8 +11,8 @@ from Hybrid.BufferController import BufferController
 from EvaluationMetric.avaliador import AvaliadorController
 from PSO.PsoLearning import PsoLearning
 from CSO.CsoLearning import CsoLearning
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
 
 import numpy as np
 import pandas as pd
@@ -26,7 +26,7 @@ def inicializa(nome, qtdParticulas, buffer):
     X = data.drop(list, axis=1)
 
     # Ajustando Parâmetros
-    avaliarController = AvaliadorController(X, y)
+    avaliarController = AvaliadorController(X, y, GaussianNB())
     # dadosModel = DadosModel(X, y)
     pso = PsoLearning()
     cso = CsoLearning()
@@ -45,8 +45,8 @@ def save_buffer(enxame, nome_base_dados, execucao, geracao, avaliarController, b
         else:
             arquivo = open('../buffer/'+nome_base_dados+'/'+nome_base_dados+'Exe'+execucao+'.txt', 'r') 
             conteudo = arquivo.readlines()
-        
-        texto = str(geracao) + ' ' + repr(1-enxame._melhorFitness) + ' ' + str(avaliarController.qtdFeatures(enxame._melhorPosicaoGlobal)) + ' ' + str(buffer.bufferSave) + '\n'
+
+        texto = str(geracao) + ' ' + str(avaliarController.qtdFeatures(enxame._melhorPosicaoGlobal)) + ' ' + str(buffer.bufferSave) + ' ' + repr(1-enxame._melhorFitness) + ' ' + str(enxame._melhorPosicaoGlobal) + '\n'
         conteudo.append(texto)   
         
         arquivo = open('../buffer/'+nome_base_dados+'/'+nome_base_dados+'Exe'+execucao+'.txt', 'w')
@@ -55,8 +55,8 @@ def save_buffer(enxame, nome_base_dados, execucao, geracao, avaliarController, b
         arquivo.close
         buffer.bufferSave = 0
 
-def aprendizagem(enxame, enxameController, geracoes, avaliarController, pso, cso, nome_base_dados, execucao, buffer):
-    
+def aprendizagemHibrida(enxame, enxameController, geracoes, avaliarController, pso, cso, nome_base_dados, execucao, buffer):
+    print('Realizando Aprendizagem Híbrida...')
     for geracao in range(geracoes):
         print(geracao, '/', geracoes)
         enxameController.atualizaMelhorPosicaoEnxame(enxame)
@@ -77,49 +77,86 @@ def aprendizagem(enxame, enxameController, geracoes, avaliarController, pso, cso
     print(geracoes, '/', geracoes)
     enxameController.atualizaMelhorPosicaoEnxame(enxame)
     save_buffer(enxame, nome_base_dados, execucao, geracoes, avaliarController, buffer)
-    # print()
-    # for particula in enxame._particulas:
-    #     print(particula._posicao,' | ', particula._fitness)
     
     print("\nMelhor Particula")
-    print(enxame._melhorPosicaoGlobal,' | ', enxame._melhorFitness)
+    print(enxame._melhorPosicaoGlobal,' | ', enxame._melhorFitness, '\n')
 
-    # print("\nParticula Média")
-    # particula_media = enxameController.pc.particulaMedia(enxame)
-    # print(particula_media)
+def aprendizagemPSO(enxame, enxameController, geracoes, avaliarController, pso, cso, nome_base_dados, execucao, buffer):
+    print('Realizando Aprendizagem PSO...')
+    for geracao in range(geracoes):
+        print(geracao, '/', geracoes)
+        enxameController.atualizaMelhorPosicaoEnxame(enxame)
+        save_buffer(enxame, nome_base_dados, execucao, geracao, avaliarController, buffer)        
+        pso.aprendizagem(enxame)
+
+        for i, particula in enumerate(enxame._particulas):
+            enxameController.pc.atualizaFitness(particula)
         
+    print(geracoes, '/', geracoes)
+    enxameController.atualizaMelhorPosicaoEnxame(enxame)
+    save_buffer(enxame, nome_base_dados, execucao, geracoes, avaliarController, buffer)
+    
+    print("\nMelhor Particula")
+    print(enxame._melhorPosicaoGlobal,' | ', enxame._melhorFitness, '\n')
+
+def aprendizagemCSO(enxame, enxameController, geracoes, avaliarController, pso, cso, nome_base_dados, execucao, buffer):
+    print('Realizando Aprendizagem CSO...')
+    for geracao in range(geracoes):
+        print(geracao, '/', geracoes)
+        enxameController.atualizaMelhorPosicaoEnxame(enxame)
+        save_buffer(enxame, nome_base_dados, execucao, geracao, avaliarController, buffer)
+        sub_win, sub_loser = enxameController.dividirEnxame(enxame)
+        
+        particula_media = enxameController.pc.particulaMedia(sub_win)
+        cso.aprendizagem(sub_win, sub_loser, particula_media)
+
+        for i, particula in enumerate(sub_win._particulas):
+            enxame._particulas.append(particula)
+
+            enxameController.pc.atualizaFitness(sub_loser._particulas[i])
+            enxame._particulas.append(sub_loser._particulas[i])
+        
+    print(geracoes, '/', geracoes)
+    enxameController.atualizaMelhorPosicaoEnxame(enxame)
+    save_buffer(enxame, nome_base_dados, execucao, geracoes, avaliarController, buffer)
+    
+    print("\nMelhor Particula")
+    print(enxame._melhorPosicaoGlobal,' | ', enxame._melhorFitness, '\n')
+
 def avaliar(enxame, enxameController, avaliarController):
     enxameController.atualizaMelhorPosicaoEnxame(enxame)
-    # avaliarController.allClassifiers(enxame._melhorPosicaoGlobal, KNeighborsClassifier())
-    avaliarController.allClassifiers(enxame._melhorPosicaoGlobal, GaussianNB())
+    avaliarController.allClassifiers(enxame._melhorPosicaoGlobal)
 
 if __name__ == "__main__":
 
-    # Wine = [1 1 0 1 1 1 1 0 1 1 0 0 1]  |  0.9896554468051245
-    # Wine = [1 0 1 0 1 1 1 1 0 1 1 1 1]  |  0.9948348133579673
-
-    if len(sys.argv) != 4:
-        print("Exemplo:")
-        print("python Main.py qtdParticulas geracoes qtdExecucoes")
-        exit()
+    # if len(sys.argv) != 4:
+    #     print("Exemplo:")
+    #     print("python Main.py qtdParticulas geracoes qtdExecucoes")
+    #     exit()
 
     # nome = sys.argv[1]
     
     # nomes = ["cancer", "ionosphere", "isolet5", "madelon", "musk", "sonar", "wine"]
     # nomes = ["isolet5", "madelon", "musk"]
-    nomes = ["cancer", "ionosphere", "sonar", "wine"]
+    # nomes = ["cancer", "ionosphere", "sonar", "wine"]
+    # Cancer Pendente a partir do 12
+    nomes = ["madelon"]
+    qtdParticulas = 100
+    geracoes = 150
+    qtdExecucoes = 15
+    # de = 1
+    # ate = 2
 
-    qtdParticulas = int(sys.argv[1])
-    geracoes = int(sys.argv[2])
-    qtdExecucoes = int(sys.argv[3])
-
-    for index in range(qtdExecucoes):
-        for nome in nomes:
+    for nome in nomes:
+        for index in range(qtdExecucoes):  
             print("Base: ", nome)
+            print('Execução: ', index)
             nomeBase = "../datasets/"+nome+"/"+nome+".csv"
             execucao = str(index+1)
             buffer = BufferController(nome, execucao)
             enxame, enxameController, avaliarController, pso, cso = inicializa(nomeBase, qtdParticulas, buffer)
 
-            aprendizagem(enxame, enxameController, geracoes, avaliarController, pso, cso, nome, execucao, buffer)
+            # aprendizagemHibrida(enxame, enxameController, geracoes, avaliarController, pso, cso, nome, execucao, buffer)
+            aprendizagemPSO(enxame, enxameController, geracoes, avaliarController, pso, cso, nome, execucao, buffer)
+            # aprendizagemCSO(enxame, enxameController, geracoes, avaliarController, pso, cso, nome, execucao, buffer)
             avaliar(enxame, enxameController, avaliarController)

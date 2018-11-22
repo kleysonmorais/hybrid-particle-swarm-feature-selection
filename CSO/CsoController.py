@@ -31,7 +31,8 @@ class ParticulaController:
             pWin = p2
             pLoser = p1
         
-        c = 1.49618
+        c = 0.1
+        # c = 2.5
 
         r1 = np.random.rand() 
         r2 = np.random.rand() 

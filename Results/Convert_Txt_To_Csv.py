@@ -1,9 +1,9 @@
 import csv
 
-nomeBase = 'ionosphere'
+nomeBase = 'madelon'
 
-for index in range(30):
-    print(str(index+1)+'/30')
+for index in range(15):
+    print(str(index+1)+'/15')
     URL = '../buffer/'+nomeBase+'/'+nomeBase+'Exe'+str(index+1)
     URL_txt = URL+'.txt'
     URL_csv = URL+'.csv'

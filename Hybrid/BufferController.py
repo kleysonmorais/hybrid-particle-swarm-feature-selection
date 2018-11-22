@@ -19,10 +19,6 @@ class BufferController:
         arquivo = open(self.URL, 'w')
         arquivo.writelines("")   
         arquivo.close()
-
-        # arquivo = open(self.URL_GLOBAL, 'w')
-        # arquivo.writelines("")   
-        # arquivo.close()
                 
     def search_buffer(self, particulaPosicao):
         arquivo = open(self.URL, 'r')
@@ -50,13 +46,10 @@ class BufferController:
         m_string = "[" + " ".join(str(x) for x in particulaPosicao) + "]"
         for linha in arquivo:
             aux = linha[0:(len(m_string))]
-            # print("Aux: ", aux)
             if m_string == aux:
                 aux2 = linha[len(m_string)+1:-1]
-                # print('Merito Encontrado')
                 return float(aux2)
         arquivo.close()
-        # print('Merito não encontrado')
         return None
 
     def save_buffer_global(self, particulaPosicao, merito):
